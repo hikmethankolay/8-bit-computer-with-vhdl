@@ -109,6 +109,8 @@ architecture arch of computer is
     signal data_in: std_logic_vector(7 downto 0);
     signal data_out: std_logic_vector(7 downto 0);
     signal write_en: std_logic;
+    signal clk: std_logic;
+    signal rst: std_logic;
 
 begin
 
@@ -161,6 +163,5 @@ begin
         port_out_14 => port_out_14,
         port_out_15 => port_out_15
     );
-
 
 end arch;

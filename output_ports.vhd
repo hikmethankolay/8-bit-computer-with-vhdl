@@ -3,13 +3,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_unsigned.all;
 
+-- Entity declaration for Output Ports
 entity output_ports is
     Port ( 
-        clk : in  STD_LOGIC;
-        rst : in  STD_LOGIC;
-        address : in  STD_LOGIC_VECTOR (7 downto 0);
-        data_in : in  STD_LOGIC_VECTOR (7 downto 0);
-        write_en : in  STD_LOGIC;
+        clk : in  STD_LOGIC;  -- Clock signal
+        rst : in  STD_LOGIC;  -- Reset signal
+        address : in  STD_LOGIC_VECTOR (7 downto 0);  -- 8-bit address input
+        data_in : in  STD_LOGIC_VECTOR (7 downto 0);  -- 8-bit data input
+        write_en : in  STD_LOGIC;  -- Write enable signal (1 for writing, 0 otherwise)
+        
+        -- 16 Output ports
         port_out_00 : out  STD_LOGIC_VECTOR (7 downto 0);
         port_out_01 : out  STD_LOGIC_VECTOR (7 downto 0);
         port_out_02 : out  STD_LOGIC_VECTOR (7 downto 0);
@@ -29,14 +32,15 @@ entity output_ports is
     );
 end output_ports;
 
-
+-- Architecture definition
 architecture arch of output_ports is
-
 begin
 
-    process(clk,rst)
+    -- Process for handling output port writes
+    process(clk, rst)
     begin
-        if(rst ='1') then
+        if rst = '1' then  -- Reset condition
+            -- Clear all output ports when reset is high
             port_out_00 <= (others => '0');
             port_out_01 <= (others => '0');
             port_out_02 <= (others => '0');
@@ -53,9 +57,11 @@ begin
             port_out_13 <= (others => '0');
             port_out_14 <= (others => '0');
             port_out_15 <= (others => '0');
-        elsif(rising_edge(clk)) then
-            if(write_en = '1') then
+
+        elsif rising_edge(clk) then  -- Execute operations on clock rising edge
+            if write_en = '1' then  -- Only update if write is enabled
                 case address is
+                    -- Assign data_in to the corresponding output port based on address
                     when x"E0" => port_out_00 <= data_in;
                     when x"E1" => port_out_01 <= data_in;
                     when x"E2" => port_out_02 <= data_in;
@@ -72,6 +78,8 @@ begin
                     when x"ED" => port_out_13 <= data_in;
                     when x"EE" => port_out_14 <= data_in;
                     when x"EF" => port_out_15 <= data_in;
+                    
+                    -- Default case
                     when others =>
                         port_out_00 <= (others => '0');
                         port_out_01 <= (others => '0');
@@ -90,8 +98,8 @@ begin
                         port_out_14 <= (others => '0');
                         port_out_15 <= (others => '0');
                 end case;
-             end if;
-         end if;
+            end if;
+        end if;
     end process;
 
 end arch;

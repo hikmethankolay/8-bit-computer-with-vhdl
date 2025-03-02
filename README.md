@@ -6,14 +6,14 @@ This project implements a basic computer system using VHDL. The system consists 
 The project includes the following VHDL files:
 
 - **ALU.vhd**: Implements arithmetic and logic operations.
-- **Computer.vhd**: Top-level module that integrates all components.
-- **Control Unit.vhd**: Generates control signals for execution.
-- **CPU.vhd**: Central processing unit integrating ALU, control, and data path.
-- **Data Memory.vhd**: Stores data required during execution.
-- **Data Path.vhd**: Manages the flow of data between units.
-- **Memory.vhd**: Additional memory handling logic.
-- **Output Ports.vhd**: Handles external output communication.
-- **Program Memory.vhd**: Stores instruction sequences for execution.
+- **computer.vhd**: Top-level module that integrates all components.
+- **control_unit.vhd**: Generates control signals for execution.
+- **cpu.vhd**: Central processing unit integrating ALU, control, and data path.
+- **data_memeory.vhd**: Stores data required during execution.
+- **data_path.vhd**: Manages the flow of data between units.
+- **memory.vhd**: Additional memory handling logic.
+- **output_ports.vhd**: Handles external output communication.
+- **program_memory.vhd**: Stores instruction sequences for execution.
 - **Testbench (tb_computer.vhd)**: Simulates the system for verification.
 
 ## How to Use

@@ -36,7 +36,7 @@ architecture arch of CPU is
             CCR_Load: out std_logic;       -- Signal to load the Condition Code Register (CCR)
             BUS1_Sel: out std_logic_vector(1 downto 0); -- Multiplexer selector for BUS1
             BUS2_Sel: out std_logic_vector(1 downto 0); -- Multiplexer selector for BUS2
-            write_en : out std_logic;      -- Write enable signal for memory operations
+            write_en : out std_logic      -- Write enable signal for memory operations
         );
     end component;
 

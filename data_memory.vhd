@@ -21,7 +21,7 @@ architecture arch of data_memory is
     type ram_type is array (128 to 223) of std_logic_vector(7 downto 0);
 
     -- Internal signals
-    signal RAM : ram_type := (others => "0");  -- Initialize RAM with all zeros
+    signal RAM : ram_type := (others => x"00");  -- Initialize RAM with all zeros
     signal enable : std_logic;  -- Enable signal for valid address range
 
 begin

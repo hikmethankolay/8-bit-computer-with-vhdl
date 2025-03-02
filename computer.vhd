@@ -7,6 +7,8 @@ use IEEE.std_logic_unsigned.all; -- Enables arithmetic operations on std_logic_v
 
 entity computer is
     port(
+            clk : in std_logic;
+            rst : in std_logic;
             -- Input ports (external device inputs)
             port_in_00 : in  STD_LOGIC_VECTOR (7 downto 0);
             port_in_01 : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -109,8 +111,6 @@ architecture arch of computer is
     signal data_in: std_logic_vector(7 downto 0);
     signal data_out: std_logic_vector(7 downto 0);
     signal write_en: std_logic;
-    signal clk: std_logic;
-    signal rst: std_logic;
 
 begin
 

@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;  -- Provides std_logic and std_logic_vector data ty
 use IEEE.numeric_std.all;      -- Provides arithmetic operations for signed and unsigned vectors
 use IEEE.std_logic_unsigned.all; -- Enables arithmetic operations on std_logic_vector
 
--- Define the entity `data_path`, which represents the datapath of a CPU or similar digital system
+-- Define the entity `data_path`, which represents the datapath of CPU
 entity data_path is
     port(
         clk: in std_logic;            -- Clock signal
@@ -46,7 +46,7 @@ architecture arch of data_path is
     signal BUS1: std_logic_vector(7 downto 0);      -- First internal data bus
     signal BUS2: std_logic_vector(7 downto 0);      -- Second internal data bus
     signal ALU_Result: std_logic_vector(7 downto 0); -- Output of the ALU
-    signal IR_Signal: std_logic_vector(7 downto 0);        -- Instruction Register
+    signal IR_Signal: std_logic_vector(7 downto 0);        -- Instruction Register Signal
     signal MAR: std_logic_vector(7 downto 0);       -- Memory Address Register
     signal PC: std_logic_vector(7 downto 0);        -- Program Counter
     signal A_Reg: std_logic_vector(7 downto 0);     -- Register A

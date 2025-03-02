@@ -46,7 +46,7 @@ architecture arch of data_path is
     signal BUS1: std_logic_vector(7 downto 0);      -- First internal data bus
     signal BUS2: std_logic_vector(7 downto 0);      -- Second internal data bus
     signal ALU_Result: std_logic_vector(7 downto 0); -- Output of the ALU
-    signal IR: std_logic_vector(7 downto 0);        -- Instruction Register
+    signal IR_Signal: std_logic_vector(7 downto 0);        -- Instruction Register
     signal MAR: std_logic_vector(7 downto 0);       -- Memory Address Register
     signal PC: std_logic_vector(7 downto 0);        -- Program Counter
     signal A_Reg: std_logic_vector(7 downto 0);     -- Register A
@@ -72,13 +72,14 @@ begin
     process(clk, rst)
     begin
         if (rst = '1') then
-            IR <= (others => '0'); -- Reset the IR to all zeros
+            IR_Signal <= (others => '0'); -- Reset the IR to all zeros
         elsif(rising_edge(clk)) then
             if(IR_load = '1') then
-                IR <= from_memory; -- Load instruction from memory
+                IR_Signal <= from_memory; -- Load instruction from memory
             end if;
         end if;
     end process;
+    IR <= IR_Signal; -- Output the instruction stored in IR_Signal
 
     -- Memory Address Register (MAR) update logic
     process(clk, rst)

@@ -184,7 +184,6 @@ type state_type is (
     constant BVC  : std_logic_vector(7 downto 0) := x"26";  -- Branch if Overflow Clear
     constant BCS  : std_logic_vector(7 downto 0) := x"27";  -- Branch if Carry Set
     constant BCC  : std_logic_vector(7 downto 0) := x"28";  -- Branch if Carry Clear
-
 begin
 
     ----------------------------------------------------------------------------
@@ -255,14 +254,54 @@ begin
                     next_state <= S_DEC_B_4;    -- Begin decrementing B
                 elsif IR = BRA then
                     next_state <= S_BRA_4;      -- Begin unconditional branch
-                elsif IR = BEQ then
-                    -- For branch if equal, check the CCR flag (CCR_Result(2))
-                    if CCR_Result(2) = '1' then
-                        next_state <= S_BEQ_4;  -- Condition met: branch to target
+                elsif IR = BMI then
+                    if CCR_Result(3) = '1' then
+                        next_state <= S_BMI_4;  -- Negative flag set: branch to target
                     else
-                        next_state <= S_BEQ_7;  -- Condition not met: continue sequentially
+                        next_state <= S_BMI_7;  -- Negative flag not set: condition not met, continue sequentially
                     end if;
-                -- Additional branch opcodes can be similarly decoded here...
+                elsif IR = BPL then
+                    if CCR_Result(3) = '0' then
+                        next_state <= S_BPL_4;  -- Negative flag clear: branch to target
+                    else
+                        next_state <= S_BPL_7;  -- Negative flag set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BEQ then
+                    if CCR_Result(2) = '1' then
+                        next_state <= S_BEQ_4;  -- Zero flag set: condition met, branch to target
+                    else
+                        next_state <= S_BEQ_7;  -- Zero flag not set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BNE then
+                    if CCR_Result(2) = '0' then
+                        next_state <= S_BNE_4;  -- Zero flag clear: condition met, branch to target
+                    else
+                        next_state <= S_BNE_7;  -- Zero flag set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BVS then
+                    if CCR_Result(1) = '1' then
+                        next_state <= S_BVS_4;  -- Overflow flag set: condition met, branch to target
+                    else
+                        next_state <= S_BVS_7;  -- Overflow flag not set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BVC then
+                    if CCR_Result(1) = '0' then
+                        next_state <= S_BVC_4;  -- Overflow flag clear: condition met, branch to target
+                    else
+                        next_state <= S_BVC_7;  -- Overflow flag set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BCS then
+                    if CCR_Result(0) = '1' then
+                        next_state <= S_BCS_4;  -- Carry flag set: condition met, branch to target
+                    else
+                        next_state <= S_BCS_7;  -- Carry flag not set: condition not met, continue sequentially
+                    end if;
+                elsif IR = BCC then
+                    if CCR_Result(0) = '0' then
+                        next_state <= S_BCC_4;  -- Carry flag clear: condition met, branch to target
+                    else
+                        next_state <= S_BCC_7;  -- Carry flag set: condition not met, continue sequentially
+                    end if;    
                 else
                     next_state <= S_FETHCH_0;   -- Default: return to fetch cycle
                 end if;
@@ -641,23 +680,27 @@ begin
             -- STB_DIR (Store B Direct) States
             ----------------------------------------------------------------------------
             when S_STB_DIR_4 =>
-                -- TODO: Define output logic for STB_DIR_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_STB_DIR_5 =>
-                -- TODO: Define output logic for STB_DIR_5
+                PC_Inc <= '1';
 
             when S_STB_DIR_6 =>
-                -- TODO: Define output logic for STB_DIR_6
+                BUS2_Sel <= "10";
+                MAR_load <= '1';
 
             when S_STB_DIR_7 =>
-                -- TODO: Define output logic for STB_DIR_7
+                BUS1_Sel <= "10";
+                write_en <= '1';
 
             ----------------------------------------------------------------------------
             -- ADD_AB (Addition of A and B) State
             ----------------------------------------------------------------------------
             when S_ADD_AB_4 =>
                 BUS1_Sel <= "01";     -- Operand from register A
-                BUS2_Sel <= "00";     -- Operand from register B
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
                 ALU_Sel  <= "000";     -- ALU configured for addition
                 A_Load   <= '1';      -- Load result into register A
                 CCR_Load <= '1';      -- Update condition code register
@@ -666,43 +709,69 @@ begin
             -- SUB_AB (Subtract B from A) State
             ----------------------------------------------------------------------------
             when S_SUB_AB_4 =>
-                -- TODO: Define output logic for SUB_AB_4
+                BUS1_Sel <= "01";     -- Operand from register A
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "001";     -- ALU configured for subtraction
+                A_Load   <= '1';      -- Load result into register A
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- AND_AB (Bitwise AND of A and B) State
             ----------------------------------------------------------------------------
             when S_AND_AB_4 =>
-                -- TODO: Define output logic for AND_AB_4
+                BUS1_Sel <= "01";     -- Operand from register A
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "010";     -- ALU configured for bitwise AND
+                A_Load   <= '1';      -- Load result into register A
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- OR_AB (Bitwise OR of A and B) State
             ----------------------------------------------------------------------------
             when S_OR_AB_4 =>
-                -- TODO: Define output logic for OR_AB_4
+                BUS1_Sel <= "01";     -- Operand from register A
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "011";     -- ALU configured for bitwise OR
+                A_Load   <= '1';      -- Load result into register A
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- INC_A (Increment A) State
             ----------------------------------------------------------------------------
             when S_INC_A_4 =>
-                -- TODO: Define output logic for INC_A_4
+                BUS1_Sel <= "01";     -- Operand from register A
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "101";     -- ALU configured for increment
+                A_Load   <= '1';      -- Load result into register A
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- INC_B (Increment B) State
             ----------------------------------------------------------------------------
             when S_INC_B_4 =>
-                -- TODO: Define output logic for INC_B_4
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "100";     -- ALU configured for increment
+                B_Load   <= '1';      -- Load result into register B
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- DEC_A (Decrement A) State
             ----------------------------------------------------------------------------
             when S_DEC_A_4 =>
-                -- TODO: Define output logic for DEC_A_4
+                BUS1_Sel <= "01";     -- Operand from register A
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "111";     -- ALU configured for increment
+                A_Load   <= '1';      -- Load result into register A
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- DEC_B (Decrement B) State
             ----------------------------------------------------------------------------
             when S_DEC_B_4 =>
-                -- TODO: Define output logic for DEC_B_4
+                BUS2_Sel <= "00";     -- Transfer ALU result to BUS2
+                ALU_Sel  <= "110";     -- ALU configured for increment
+                B_Load   <= '1';      -- Load result into register B
+                CCR_Load <= '1';      -- Update condition code register
 
             ----------------------------------------------------------------------------
             -- BRA (Unconditional Branch) States
@@ -720,6 +789,42 @@ begin
                 PC_load  <= '1';
 
             ----------------------------------------------------------------------------
+            -- BMI (Branch if Negative) States
+            ----------------------------------------------------------------------------
+            when S_BMI_4 =>
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
+
+            when S_BMI_5 =>
+                -- Waiting for branch target address
+
+            when S_BMI_6 =>
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
+
+            when S_BMI_7 =>
+                PC_Inc <= '1';
+
+            ----------------------------------------------------------------------------
+            -- BPL (Branch if Positive) States
+            ----------------------------------------------------------------------------
+            when S_BPL_4 =>
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
+
+            when S_BPL_5 =>
+                -- Waiting for branch target address
+
+            when S_BPL_6 =>
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
+
+            when S_BPL_7 =>
+                PC_Inc <= '1';
+
+            ----------------------------------------------------------------------------
             -- BEQ (Branch if Equal) States
             ----------------------------------------------------------------------------
             when S_BEQ_4 =>
@@ -728,7 +833,7 @@ begin
                 MAR_load <= '1';
 
             when S_BEQ_5 =>
-                -- Waiting for branch target address (no control signals defined)
+                -- Waiting for branch target address
 
             when S_BEQ_6 =>
                 BUS2_Sel <= "10";
@@ -738,109 +843,94 @@ begin
                 PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
-            -- BMI (Branch if Negative) States
-            ----------------------------------------------------------------------------
-            when S_BMI_4 =>
-                -- TODO: Define output logic for BMI_4
-
-            when S_BMI_5 =>
-                -- TODO: Define output logic for BMI_5
-
-            when S_BMI_6 =>
-                -- TODO: Define output logic for BMI_6
-
-            when S_BMI_7 =>
-                -- TODO: Define output logic for BMI_7
-
-            ----------------------------------------------------------------------------
-            -- BPL (Branch if Positive) States
-            ----------------------------------------------------------------------------
-            when S_BPL_4 =>
-                -- TODO: Define output logic for BPL_4
-
-            when S_BPL_5 =>
-                -- TODO: Define output logic for BPL_5
-
-            when S_BPL_6 =>
-                -- TODO: Define output logic for BPL_6
-
-            when S_BPL_7 =>
-                -- TODO: Define output logic for BPL_7
-
-            ----------------------------------------------------------------------------
             -- BNE (Branch if Not Equal) States
             ----------------------------------------------------------------------------
             when S_BNE_4 =>
-                -- TODO: Define output logic for BNE_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_BNE_5 =>
-                -- TODO: Define output logic for BNE_5
+                -- Waiting for branch target address
 
             when S_BNE_6 =>
-                -- TODO: Define output logic for BNE_6
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
 
             when S_BNE_7 =>
-                -- TODO: Define output logic for BNE_7
+                PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
             -- BVS (Branch if Overflow Set) States
             ----------------------------------------------------------------------------
             when S_BVS_4 =>
-                -- TODO: Define output logic for BVS_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_BVS_5 =>
-                -- TODO: Define output logic for BVS_5
+                -- Waiting for branch target address
 
             when S_BVS_6 =>
-                -- TODO: Define output logic for BVS_6
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
 
             when S_BVS_7 =>
-                -- TODO: Define output logic for BVS_7
+                PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
             -- BVC (Branch if Overflow Clear) States
             ----------------------------------------------------------------------------
             when S_BVC_4 =>
-                -- TODO: Define output logic for BVC_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_BVC_5 =>
-                -- TODO: Define output logic for BVC_5
+                -- Waiting for branch target address
 
             when S_BVC_6 =>
-                -- TODO: Define output logic for BVC_6
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
 
             when S_BVC_7 =>
-                -- TODO: Define output logic for BVC_7
+                PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
             -- BCS (Branch if Carry Set) States
             ----------------------------------------------------------------------------
             when S_BCS_4 =>
-                -- TODO: Define output logic for BCS_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_BCS_5 =>
-                -- TODO: Define output logic for BCS_5
+                -- Waiting for branch target address
 
             when S_BCS_6 =>
-                -- TODO: Define output logic for BCS_6
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
 
             when S_BCS_7 =>
-                -- TODO: Define output logic for BCS_7
+                PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
             -- BCC (Branch if Carry Clear) States
             ----------------------------------------------------------------------------
             when S_BCC_4 =>
-                -- TODO: Define output logic for BCC_4
+                BUS1_Sel <= "00";
+                BUS2_Sel <= "01";
+                MAR_load <= '1';
 
             when S_BCC_5 =>
-                -- TODO: Define output logic for BCC_5
+                -- Waiting for branch target address
 
             when S_BCC_6 =>
-                -- TODO: Define output logic for BCC_6
+                BUS2_Sel <= "10";
+                PC_load  <= '1';
 
             when S_BCC_7 =>
-                -- TODO: Define output logic for BCC_7
+                PC_Inc <= '1';
 
             ----------------------------------------------------------------------------
             -- Default Case
@@ -853,7 +943,7 @@ begin
                 PC_Inc    <= '0';
                 A_Load    <= '0';
                 B_Load    <= '0';
-                ALU_Sel   <= (others => '0');
+                ALU_Sel   <= (others => '0'); 
                 CCR_Load  <= '0';
                 BUS1_Sel  <= (others => '0');
                 BUS2_Sel  <= (others => '0');

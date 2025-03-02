@@ -51,11 +51,12 @@ architecture arch of program_memory is
 
     -- Hardcoded Instructions in ROM
     constant ROM: rom_type := (
-        0 => LDA_IMM,  -- Load A with Immediate Value
-        1 => x"00",    -- Operand: A = 0x00
+        0 => LDA_IMM,  -- Load A with  Immediate Value
+        1 => x"0F",    -- Operand: A = 0x0F
         2 => STA_DIR,  -- Store A into memory at address 0x80
         3 => x"80",    -- Memory Address 0x80
         4 => BRA,      -- Unconditional Branch
+        5 => x"00",    -- Memory Address 0x00
         others => x"00" -- Initialize remaining ROM with 0
     );
 
